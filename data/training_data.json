@@ -1,0 +1,29 @@
+{
+    "conversations":[
+
+        {
+            "input":"my name is",
+            "intent":"save_name"
+        },
+
+        {
+            "input":"who am i",
+            "intent":"recall_name"
+        },
+
+        {
+            "input":"coding mode open code programming",
+            "intent":"execute_command"
+        },
+
+        {
+            "input":"study learn focus notes",
+            "intent":"study"
+        },
+
+        {
+            "input":"hello hi hey",
+            "intent":"greeting"
+        }
+    ]
+}

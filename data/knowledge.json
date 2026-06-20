@@ -1,0 +1,22 @@
+{
+    "knowledge":{
+
+        "ai":[
+            "AI stands for Artificial Intelligence.",
+            "AI allows systems to learn patterns and make decisions."
+        ],
+
+        "python":[
+            "Python is a high-level programming language.",
+            "Python is widely used for AI and automation."
+        ],
+
+        "neurotech":[
+            "Neurotechnology combines neuroscience and computing."
+        ],
+
+        "machine learning":[
+            "Machine Learning allows systems to learn from data."
+        ]
+    }
+}
