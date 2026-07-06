@@ -1,10 +1,22 @@
 [
     {
-        "task": "build dream reconstruction ai",
-        "done": false
+        "id": 1,
+        "goal": "Build Neuro AI",
+        "title": "Learn Python",
+        "status": "completed",
+        "priority": 10,
+        "depends_on": null,
+        "created": "2026-07-05 22:49:35.715743",
+        "completed": "2026-07-05 22:49:35.718515"
     },
     {
-        "task": "learn transformers",
-        "done": false
+        "id": 2,
+        "goal": "Build Neuro AI",
+        "title": "Learn Machine Learning",
+        "status": "todo",
+        "priority": 9,
+        "depends_on": null,
+        "created": "2026-07-05 22:49:35.716918",
+        "completed": null
     }
 ]
