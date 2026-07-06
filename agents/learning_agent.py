@@ -1,118 +1,71 @@
-import json
-import os
-
-FILE = "data/knowledge.json"
+from memory.semantic_memory import SemanticMemory
 
 
 class LearningAgent:
 
     def __init__(self):
 
-        if not os.path.exists(FILE):
-
-            with open(FILE, "w") as f:
-                json.dump({}, f)
-
-
-    def load(self):
-
-        try:
-
-            with open(FILE, "r") as f:
-
-                data = json.load(f)
-
-            if not isinstance(data, dict):
-
-                return {}
-
-            return data
-
-        except:
-
-            return {}
-
-
-    def save(self, data):
-
-        with open(FILE, "w") as f:
-
-            json.dump(
-                data,
-                f,
-                indent=4
-            )
-
+        self.semantic = SemanticMemory()
 
     def learn(self, text):
 
-        text = text.strip()
+        text = text.lower().strip()
 
-        lower = text.lower()
+        key = None
+        value = None
 
+        if text.startswith("remember"):
 
-        # Ignore questions
-        blocked = [
-
-            "what is",
-            "who is",
-            "where is",
-            "why is",
-            "how is",
-            "tell me",
-            "explain"
-        ]
-
-
-        for b in blocked:
-
-            if lower.startswith(b):
-
-                return None
-
-
-        if " is " in lower:
-
-            parts = text.split(
-                " is ",
+            statement = text.replace(
+                "remember",
+                "",
                 1
+            ).strip()
+
+            if " is " in statement:
+
+                key, value = statement.split(
+                    " is ",
+                    1
+                )
+
+                key = key.strip()
+                value = "is " + value.strip()
+
+        if key and value:
+
+            self.semantic.learn(
+                key,
+                value
             )
 
-            if len(parts) == 2:
-
-                key = parts[0].lower().strip()
-
-                value = parts[1].strip()
-
-
-                knowledge = self.load()
-
-                knowledge[key] = value
-
-                self.save(
-                    knowledge
-                )
-
-                return (
-                    f"Learned: {key}"
-                )
+            return f"Learned: {key}"
 
         return None
 
 
-    def recall(self, query):
+    def recall(self, text):
 
-        knowledge = self.load()
+        text = text.lower()
 
-        query = query.lower()
+        if text.startswith(
+            "what do you know about"
+        ):
 
+            topic = text.replace(
+                "what do you know about",
+                "",
+                1
+            ).strip()
 
-        for key, value in knowledge.items():
+            result = self.semantic.recall(
+                topic
+            )
 
-            if key in query:
+            if result:
 
                 return (
-                    f"{key}: {value}"
+                    f"{topic.title()} {result}"
                 )
 
         return None

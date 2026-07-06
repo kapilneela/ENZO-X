@@ -1,97 +1,224 @@
 import json
 import os
+from datetime import datetime
 
-FILE = "data/tasks.json"
+from agents.goal_agent import GoalAgent
 
 
 class TaskAgent:
 
     def __init__(self):
 
-        if not os.path.exists(FILE):
-            self.reset()
+        self.goal = GoalAgent()
 
+        self.file = "data/tasks.json"
 
-    def reset(self):
+        os.makedirs("data", exist_ok=True)
 
-        with open(FILE,"w") as f:
-            json.dump([],f,indent=4)
+        if not os.path.exists(self.file):
+
+            with open(self.file, "w") as f:
+
+                json.dump([], f, indent=4)
+
+        self.tasks = self.load()
 
 
     def load(self):
 
         try:
 
-            with open(FILE,"r") as f:
-                data=json.load(f)
+            with open(self.file, "r") as f:
 
-            if not isinstance(data,list):
-                self.reset()
-                return []
-
-            return data
+                return json.load(f)
 
         except:
-            self.reset()
+
             return []
 
 
-    def save(self,data):
+    def save(self):
 
-        with open(FILE,"w") as f:
-            json.dump(data,f,indent=4)
+        with open(self.file, "w") as f:
+
+            json.dump(
+                self.tasks,
+                f,
+                indent=4
+            )
 
 
-    def add_task(self,user_input):
+    def add(
 
-        text=user_input.lower()
+        self,
 
-        triggers=[
+        goal,
 
-            "add task",
-            "todo",
-            "remember task"
+        title,
+
+        priority=5,
+
+        depends_on=None
+
+    ):
+
+        task = {
+
+            "id": len(self.tasks)+1,
+
+            "goal": goal,
+
+            "title": title,
+
+            "status": "todo",
+
+            "priority": priority,
+
+            "depends_on": depends_on,
+
+            "created": str(datetime.now()),
+
+            "completed": None
+
+        }
+
+        self.tasks.append(task)
+
+        self.goal.add_task(
+            goal,
+            title
+        )
+
+        self.save()
+
+        return task
+
+
+    def start(self, title):
+
+        for task in self.tasks:
+
+            if task["title"].lower()==title.lower():
+
+                task["status"]="in_progress"
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def complete(self, title):
+
+        for task in self.tasks:
+
+            if task["title"].lower()==title.lower():
+
+                task["status"]="completed"
+
+                task["completed"]=str(datetime.now())
+
+                self.goal.finish_task(
+                    task["goal"],
+                    task["title"]
+                )
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def block(self,title):
+
+        for task in self.tasks:
+
+            if task["title"].lower()==title.lower():
+
+                task["status"]="blocked"
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def pending(self):
+
+        return [
+
+            t for t in self.tasks
+
+            if t["status"]!="completed"
+
         ]
 
-        for trigger in triggers:
 
-            if trigger in text:
+    def completed(self):
 
-                task=text.replace(
-                    trigger,
-                    ""
-                ).strip()
+        return [
 
-                tasks=self.load()
+            t for t in self.tasks
 
-                tasks.append({
+            if t["status"]=="completed"
 
-                    "task":task,
-                    "done":False
-                })
-
-                self.save(tasks)
-
-                return f"Task added: {task}"
-
-        return None
+        ]
 
 
-    def show_tasks(self):
+    def next_task(self):
 
-        tasks=self.load()
+        pending=self.pending()
 
-        if len(tasks)==0:
+        if not pending:
 
-            return "No tasks available."
+            return None
+
+        pending=sorted(
+
+            pending,
+
+            key=lambda x:x["priority"],
+
+            reverse=True
+
+        )
+
+        return pending[0]
 
 
-        result="Tasks:\n\n"
+    def goal_tasks(
 
-        for i,item in enumerate(tasks,1):
+        self,
 
-            status="✓" if item["done"] else "○"
+        goal
 
-            result+=f"{i}. {status} {item['task']}\n"
+    ):
 
-        return result
+        return [
+
+            t for t in self.tasks
+
+            if t["goal"].lower()==goal.lower()
+
+        ]
+
+
+    def remove(self,title):
+
+        self.tasks=[
+
+            t for t in self.tasks
+
+            if t["title"].lower()!=title.lower()
+
+        ]
+
+        self.save()
+
+
+    def show(self):
+
+        return self.tasks

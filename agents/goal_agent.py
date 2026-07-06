@@ -1,90 +1,316 @@
 import json
 import os
-
-FILE = "data/goals.json"
+from datetime import datetime
 
 
 class GoalAgent:
 
     def __init__(self):
 
-        if not os.path.exists(FILE):
-            self.reset()
+        self.file = "memory/goals.json"
 
-    def reset(self):
+        os.makedirs("memory", exist_ok=True)
 
-        with open(FILE, "w") as f:
-            json.dump([], f, indent=4)
+        if not os.path.exists(self.file):
+            with open(self.file, "w") as f:
+                json.dump([], f, indent=4)
+
+        self.goals = self.load()
+
 
     def load(self):
 
         try:
 
-            with open(FILE, "r") as f:
-                data = json.load(f)
-
-            if not isinstance(data, list):
-                self.reset()
-                return []
-
-            return data
+            with open(self.file, "r") as f:
+                return json.load(f)
 
         except Exception:
-            self.reset()
+
             return []
 
-    def save(self, data):
 
-        with open(FILE, "w") as f:
-            json.dump(data, f, indent=4)
+    def save(self):
 
-    def set_goal(self, user_input):
+        with open(self.file, "w") as f:
 
-        text = user_input.lower()
+            json.dump(
+                self.goals,
+                f,
+                indent=4
+            )
 
-        triggers = [
-            "my goal is",
-            "goal is",
-            "i want to"
+
+    def add(self, name):
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == name.lower():
+
+                return False
+
+        self.goals.append({
+
+            "id": len(self.goals) + 1,
+
+            "name": name,
+
+            "status": "active",
+
+            "progress": 0,
+
+            "priority": 5,
+
+            "created": str(datetime.now()),
+
+            "completed": None,
+
+            "tasks": []
+
+        })
+
+        self.save()
+
+        return True
+
+
+    def remove(self, name):
+
+        self.goals = [
+
+            g for g in self.goals
+
+            if g["name"].lower() != name.lower()
+
         ]
 
-        for trigger in triggers:
+        self.save()
 
-            if trigger in text:
 
-                goal = text.replace(
-                    trigger,
-                    ""
-                ).strip()
+    def complete(self, name):
 
-                goals = self.load()
+        for goal in self.goals:
 
-                goals.append(goal)
+            if goal["name"].lower() == name.lower():
 
-                self.save(goals)
+                goal["status"] = "completed"
 
-                return f"Goal saved: {goal}"
+                goal["progress"] = 100
+
+                goal["completed"] = str(datetime.now())
+
+        self.save()
+
+
+    def set_priority(
+
+        self,
+
+        name,
+
+        priority
+
+    ):
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == name.lower():
+
+                goal["priority"] = priority
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def update_progress(
+
+        self,
+
+        name,
+
+        value
+
+    ):
+
+        value = max(0, min(100, value))
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == name.lower():
+
+                goal["progress"] = value
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def add_task(
+
+        self,
+
+        goal_name,
+
+        task
+
+    ):
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == goal_name.lower():
+
+                goal["tasks"].append({
+
+                    "task": task,
+
+                    "done": False
+
+                })
+
+                self.save()
+
+                return True
+
+        return False
+
+
+    def finish_task(
+
+        self,
+
+        goal_name,
+
+        task
+
+    ):
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == goal_name.lower():
+
+                for t in goal["tasks"]:
+
+                    if t["task"].lower() == task.lower():
+
+                        t["done"] = True
+
+                        self._recalculate(goal)
+
+                        self.save()
+
+                        return True
+
+        return False
+
+
+    def _recalculate(
+
+        self,
+
+        goal
+
+    ):
+
+        tasks = goal["tasks"]
+
+        if not tasks:
+
+            return
+
+        completed = sum(
+
+            1 for t in tasks
+
+            if t["done"]
+
+        )
+
+        goal["progress"] = int(
+
+            completed /
+
+            len(tasks) *
+
+            100
+
+        )
+
+        if goal["progress"] == 100:
+
+            goal["status"] = "completed"
+
+            goal["completed"] = str(datetime.now())
+
+
+    def highest_priority(self):
+
+        active = [
+
+            g for g in self.goals
+
+            if g["status"] == "active"
+
+        ]
+
+        if not active:
+
+            return None
+
+        return sorted(
+
+            active,
+
+            key=lambda x: x["priority"],
+
+            reverse=True
+
+        )[0]
+
+
+    def active(self):
+
+        return [
+
+            g for g in self.goals
+
+            if g["status"] == "active"
+
+        ]
+
+
+    def completed(self):
+
+        return [
+
+            g for g in self.goals
+
+            if g["status"] == "completed"
+
+        ]
+
+
+    def get(
+
+        self,
+
+        name
+
+    ):
+
+        for goal in self.goals:
+
+            if goal["name"].lower() == name.lower():
+
+                return goal
 
         return None
 
-    def suggest_today(self):
 
-        goals = self.load()
+    def show(self):
 
-        if len(goals) == 0:
-            return "No goals found."
-
-        latest = goals[-1]
-
-        return f"""
-Today's suggested actions:
-
-1. Continue working on:
-   {latest}
-
-2. Study something related
-
-3. Build a small improvement
-
-4. Document progress
-"""
+        return self.goals
