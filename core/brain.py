@@ -1,21 +1,30 @@
+from agents.reflection2_agent import Reflection2Agent
 from core.nlu import NLU
 from core.workspace import Workspace
 from core.brain_state import BrainState
-
 from agents.research_agent import ResearchAgent
 from agents.planner_agent import Planner
 from agents.response_agent import ResponseAgent
 from agents.reasoning_agent import ReasoningAgent
 from agents.critic_agent import CriticAgent
-
 from agents.session_agent import SessionAgent
 from agents.decision_agent import DecisionAgent
 from agents.tool_agent import ToolAgent
-
 from agents.graph_agent import GraphAgent
 from agents.world_model_agent import WorldModel
 from agents.episodic_agent import EpisodicAgent
 from agents.emotion_agent import EmotionAgent
+from core.blackboard import Blackboard
+from agents.goal_agent import GoalAgent
+from agents.task_agent import TaskAgent
+from core.executive import Executive
+from agents.planner2_agent import Planner2Agent
+from core.cognitive_cycle import CognitiveCycle
+from agents.reflection2_agent import Reflection2Agent
+from memory.semantic_memory import SemanticMemory
+from agents.reflection_agent import ReflectionAgent
+
+
 
 
 class Brain:
@@ -27,13 +36,23 @@ class Brain:
         self.workspace = Workspace()
         self.state = BrainState()
 
+        # Memory 
+        self.semantic = SemanticMemory()
+        self.reflection2 = Reflection2Agent()
+        self.cycle = CognitiveCycle(
+                    self,interval=10
+                )
+
         # Main agents
         self.research = ResearchAgent()
         self.planner = Planner()
         self.response = ResponseAgent()
         self.reasoning = ReasoningAgent()
         self.critic = CriticAgent()
-
+        self.goal_agent = GoalAgent()
+        self.task_agent = TaskAgent()
+        self.reflection = ReflectionAgent()
+        
         # Support systems
         self.session = SessionAgent()
         self.decision = DecisionAgent()
@@ -44,6 +63,108 @@ class Brain:
         self.world = WorldModel()
         self.episode = EpisodicAgent()
         self.emotion = EmotionAgent()
+        self.emotion = EmotionAgent()
+        self.blackboard = Blackboard()
+        self.planner2 = Planner2Agent()
+
+        # Executive Controller
+        self.executive = Executive(self)
+        self.cycle = CognitiveCycle(self, interval=5)
+        self.executive.register("planner", self.planner)
+        self.executive.register("planner2", self.planner2)
+        self.executive.register("research", self.research)
+        self.executive.register("reasoning", self.reasoning)
+        self.executive.register("critic", self.critic)
+        self.executive.register("response", self.response)
+        self.executive.register("emotion", self.emotion)
+        self.executive.register("episode", self.episode)
+        self.executive.register("task", self.task_agent)
+
+        self.executive.register(
+            "planner",
+            self.planner
+        )
+
+        self.executive.register(
+            "research",
+            self.research
+        )
+
+
+        self.executive.register(
+            "reasoning",
+            self.reasoning
+        )
+
+        self.executive.register(
+            "response",
+            self.response
+        )
+
+        self.executive.register(
+            "critic",
+            self.critic
+        )
+
+        self.executive.register(
+            "tools",
+            self.tools
+        )
+
+        self.executive.register(
+            "emotion",
+            self.emotion
+        )
+
+        self.executive.register(
+            "world",
+            self.world
+        )
+
+        self.executive.register(
+            "episode",
+            self.episode
+        )
+
+        self.executive.subscribe(
+            "goal.created",
+            self._goal_created
+        )
+
+        self.executive.subscribe(
+            "research.finished",
+            self._research_finished
+        )
+
+        self.executive.subscribe(
+            "response.generated",
+            self._response_generated
+        )
+        self.executive.register(
+            "planner2",
+            self.planner2
+        )
+
+    def start(self):
+        self.cycle.start()
+
+
+    def stop(self):
+        self.cycle.stop()
+
+    def cognitive_step(self):
+
+        goal = self.goal_agent.highest_priority()
+
+        if goal:
+
+            print(
+            "[ENZO]",
+            "Thinking about:",
+            goal["name"]
+        )
+
+
 
 
     def think(self, user_input):
@@ -91,6 +212,22 @@ class Brain:
             "emotion",
             mood
         )
+
+        self.blackboard.write(
+            "intent",
+            intent
+        )
+
+        self.blackboard.write(
+            "topic",
+            topic
+        )
+
+        self.blackboard.write(
+            "emotion",
+            mood
+        )
+
 
         # =====================
         # Save episode
@@ -217,6 +354,16 @@ class Brain:
                     result
                 )
 
+                self.executive.publish(
+                    "goal.created",
+                    topic
+                )
+
+                self.executive.add_task(
+                    f"Learn {topic}",
+                    priority=8
+                )   
+
 
             elif intent == "build":
 
@@ -227,6 +374,17 @@ class Brain:
                 self.workspace.set(
                     "plan",
                     result
+                )
+
+                
+                self.executive.publish(
+                    "goal.created",
+                    topic
+                )
+
+                self.executive.add_task(
+                    f"Build {topic}",
+                    priority=10
                 )
 
 
@@ -240,6 +398,13 @@ class Brain:
                     "research",
                     result
                 )
+
+                self.executive.publish(
+                    "research.finished",
+                    topic
+                )
+
+
 
 
             elif intent == "emotion":
@@ -350,6 +515,11 @@ class Brain:
             final_response
         )
 
+        self.executive.publish(
+            "response.generated",
+            final_response
+        )
+
         return final_response
 
 
@@ -357,12 +527,48 @@ class Brain:
 
         return self.workspace.show()
 
-
     def show_state(self):
 
         return self.state.dump()
+    
+    def executive_status(self):
 
+        return self.executive.status()
+
+    def next_task(self):
+
+        return self.executive.execute_next()
 
     def show_history(self):
 
         return self.session.summary()
+
+
+    # Executive Events
+
+    def _goal_created(
+        self,
+        data
+    ):
+
+        print(
+        f"[Executive] Goal Created -> {data}"
+        )
+
+
+    def _research_finished(
+    self,
+    data
+    ):
+
+        print(
+        f"[Executive] Research Finished"
+    )
+
+
+    def _response_generated(
+    self,
+    data
+    ):
+
+        pass
