@@ -132,9 +132,7 @@ class NLU:
             intent = "recent"
             topic = None
 
-        # =====================
         # Emotion statements
-        # =====================
 
         elif any(
             word in text

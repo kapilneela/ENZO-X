@@ -1,48 +1,39 @@
-from collections import deque
-
-
 class Scheduler:
 
     def __init__(self):
 
-        self.queue = deque()
+        pass
 
-    def add(
-        self,
-        name,
-        priority=5
-    ):
+    def prioritize(self, tasks):
 
-        self.queue.append({
+        pending = []
 
-            "name": name,
+        for task in tasks:
 
-            "priority": priority
+            if task.get("status", "pending") != "done":
 
-        })
+                pending.append(task)
 
-    def next(self):
+        pending.sort(
 
-        if not self.queue:
+            key=lambda x: (
 
-            return None
+                -x.get("priority", 5),
 
-        tasks = sorted(
+                x.get("difficulty", 5)
 
-            self.queue,
-
-            key=lambda x: x["priority"],
-
-            reverse=True
+            )
 
         )
 
-        task = tasks.pop(0)
+        return pending
 
-        self.queue = deque(tasks)
+    def next_task(self, tasks):
 
-        return task
+        ordered = self.prioritize(tasks)
 
-    def show(self):
+        if ordered:
 
-        return list(self.queue)
+            return ordered[0]
+
+        return None

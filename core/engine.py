@@ -11,7 +11,6 @@ from agents.learning_agent import LearningAgent
 from agents.skill_agent import SkillAgent
 from agents.autonomous_agent import AutonomousAgent
 from agents.web_agent import WebAgent
-
 from core.thinking_loop import ThinkingLoop
 
 
@@ -50,9 +49,7 @@ class Enzo:
 
         text = user_input.lower().strip()
 
-        # -----------------------------
         # GOALS
-        # -----------------------------
 
         if text.startswith("goal "):
 
@@ -88,10 +85,8 @@ class Enzo:
             return str(
                 self.brain.blackboard.dump()
             )
-
-        # -----------------------------
+            
         # TASKS
-        # -----------------------------
 
         if text.startswith("task "):
 
@@ -122,9 +117,8 @@ class Enzo:
 
             return self.brain.task_agent.show()
 
-        # -----------------------------
+
         # SKILLS
-        # -----------------------------
 
         if text.startswith("learn"):
 
@@ -138,10 +132,34 @@ class Enzo:
         if text == "show skills":
 
             return self.skills.show()
+        
+        # ATTENTION
 
-        # -----------------------------
+        if text=="show focus":
+            focus = self.brain.workspace.get(
+                "focus"
+            )
+
+            if not focus:
+                return "No focus available."
+
+            return (
+                "Current focus:\n\n"
+                + "\n".join(
+                f"- {x}"
+                for x in focus
+                )
+            )
+        
+        # CoT
+
+        if text=="show thoughts":
+
+            thoughts=self.brain.thought.recent()
+            return "\n".join(thoughts)
+
+
         # AUTONOMOUS
-        # -----------------------------
 
         if text in [
             "autonomous",
@@ -153,10 +171,8 @@ class Enzo:
                 self.brain.task_agent.show()
             )
 
-        # -----------------------------
         # WEB
-        # -----------------------------
-
+        
         if text.startswith("latest"):
 
             topic = text.replace(
@@ -166,9 +182,8 @@ class Enzo:
 
             return self.web.search(topic)
 
-        # -----------------------------
         # LEARNING MEMORY
-        # -----------------------------
+
 
         result = self.learning.recall(
             user_input
@@ -184,9 +199,7 @@ class Enzo:
         if result:
             return result
 
-        # -----------------------------
         # VECTOR MEMORY
-        # -----------------------------
 
         if len(text.split()) > 4:
 
@@ -207,6 +220,181 @@ class Enzo:
 
             if result:
                 return result
+            
+
+
+        # KNOWLEDGE GRAPH
+
+        if text.startswith("connect"):
+
+            parts=text.replace(
+                "connect",
+                "",
+                1
+            ).split(",")
+
+            if len(parts)==3:
+
+                return str(
+            self.brain.knowledge.connect(
+                parts[0].strip(),
+                parts[1].strip(),
+                parts[2].strip()
+                )
+            )
+
+
+        if text.startswith("show graph"):
+            topic=text.replace(
+                "show graph",
+                ""
+            ).strip()
+
+            result=self.brain.knowledge.related(
+                topic
+            )
+
+            return str(result)
+        
+        #R2 REASONING
+
+        if text=="show reasoning":
+
+            data=self.brain.workspace.get(
+                "reasoning_stream"
+            )
+
+            if not data:
+                return "No reasoning available"
+
+            return "\n".join(data)
+        
+        # T/C/S Functioning 
+
+        if text=="show tool":
+
+            return str(
+                self.brain.workspace.get(
+                    "selected_tool"
+                )
+            )
+
+
+        if text=="show curiosity":
+
+            return str(
+                self.brain.workspace.get(
+                    "curiosity"
+                )
+            )
+
+
+        if text=="show summary":
+
+            return str(
+                self.brain.workspace.get(
+                    "summary"
+                )
+            )
+        
+        # Prediction & Context
+
+        if text=="show prediction":
+
+            return str(
+                self.brain.workspace.get(
+                "prediction"
+                )
+            )
+
+
+        if text=="show context":
+
+            return str(
+                self.brain.workspace.get(
+                    "context"
+                )
+            )
+        
+        if text=="show action":
+
+            return str(
+            self.brain.workspace.get(
+                "next_action"
+            ))
+
+
+        if text=="show improvements":
+
+            return str(
+                self.brain.workspace.get(
+                "improvements"
+            ))
+            
+        # DREAM 
+        
+        if text=="show dream":
+            return str(
+                self.brain.workspace.get(
+                "dream"
+                )
+            )
+
+        if text=="show mission":
+            return str(
+                self.brain.workspace.get(
+                "mission"
+                )
+            )
+
+        if text=="show anomaly":
+            return str(
+                self.brain.workspace.get(
+                    "anomaly"
+                )
+            )
+
+        if text=="show social":
+            return str(
+                self.brain.workspace.get(
+                    "social"
+                )
+            )
+        
+
+        # SIMULATION
+
+        if text=="show futures":
+
+            return str(
+                self.brain.workspace.get(
+                    "futures"
+                )
+            )
+
+
+        if text=="show dream":
+
+            return str(
+                self.brain.workspace.get(
+                    "dream"
+                )
+            )
+        
+        # MIND STATE
+        
+        if text == "show mind":
+
+            return str(
+                self.brain.mind
+            )
+
+        if text == "show perception":
+            return str(
+                self.brain.perception.perceive(
+                    user_input
+                )
+            )
 
         topic = None
         
@@ -224,13 +412,14 @@ class Enzo:
             if topic:
                 return f"{topic.title()} {result}"
             return result
-
-        # -----------------------------
+        
         # BRAIN
-        # -----------------------------
 
         return self.brain.think(
             user_input
         )
+
+
+        
 
         

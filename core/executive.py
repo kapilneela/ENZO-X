@@ -3,17 +3,6 @@ from collections import deque
 
 class Executive:
 
-    """
-    ENZO Executive
-
-    Responsibilities
-    ----------------
-    ✓ Event Bus
-    ✓ Task Queue
-    ✓ Blackboard Publishing
-    ✓ Background Execution
-    """
-
     def __init__(self, brain):
 
         self.brain = brain
@@ -24,9 +13,7 @@ class Executive:
 
         self.registry = {}
 
-    # =====================================================
     # Agent Registry
-    # =====================================================
 
     def register(self, name, agent):
 
@@ -36,9 +23,7 @@ class Executive:
 
         return self.registry.get(name)
 
-    # =====================================================
     # Event Bus
-    # =====================================================
 
     def subscribe(self, event, callback):
 
@@ -58,9 +43,8 @@ class Executive:
 
                 print("[Executive Event]", e)
 
-    # =====================================================
+   
     # Blackboard
-    # =====================================================
 
     def publish_blackboard(self, outputs):
 
@@ -82,9 +66,7 @@ class Executive:
 
             )
 
-    # =====================================================
     # Queue
-    # =====================================================
 
     def add_task(
 
@@ -140,9 +122,7 @@ class Executive:
 
             )
 
-    # =====================================================
     # Debug
-    # =====================================================
 
     def status(self):
 

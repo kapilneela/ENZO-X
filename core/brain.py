@@ -23,9 +23,40 @@ from core.cognitive_cycle import CognitiveCycle
 from agents.reflection2_agent import Reflection2Agent
 from memory.semantic_memory import SemanticMemory
 from agents.reflection_agent import ReflectionAgent
-
-
-
+from agents.attention_agent import AttentionAgent
+from agents.thought_agent import ThoughtAgent
+from agents.knowledge_agent import KnowledgeAgent
+from agents.reasoning2_agent import Reasoning2Agent
+from agents.tool_selector_agent import ToolSelectorAgent
+from agents.curiosity_agent import CuriosityAgent
+from agents.summary_agent import SummaryAgent
+from agents.prediction_agent import PredictionAgent
+from agents.personality_agent import PersonalityAgent
+from agents.context_agent import ContextAgent
+from agents.scheduler_agent import SchedulerAgent
+from agents.self_improvement_agent import SelfImprovementAgent
+from agents.action_agent import ActionAgent
+from agents.simulation_agent import SimulationAgent
+from agents.evolution_agent import EvolutionAgent
+from agents.imagination_agent import ImaginationAgent
+from agents.debate_agent import DebateAgent
+from agents.reality_agent import RealityAgent
+from agents.strategy_agent import StrategyAgent
+from agents.dream_agent import DreamAgent
+from agents.subconscious_agent import SubconsciousAgent
+from agents.anomaly_agent import AnomalyAgent
+from agents.mission_agent import MissionAgent
+from agents.social_agent import SocialAgent
+from agents.survival_agent import SurvivalAgent
+from core.perception import Perception
+from core.mind_state import MindState
+from core.utility_engine import UtilityEngine
+from core.workspace import Workspace
+from core.event_bus import EventBus
+from core.tool_registry import ToolRegistry
+from core.cognitive_engine import CognitiveEngine
+from agents.memory_agent import MemoryAgent
+#from agents.vision_agent import VisionAgent
 
 class Brain:
 
@@ -35,6 +66,13 @@ class Brain:
         self.nlu = NLU()
         self.workspace = Workspace()
         self.state = BrainState()
+        self.perception = Perception()
+        self.mind = MindState()
+        self.utility = UtilityEngine()
+        self.workspace = Workspace()
+        self.events = EventBus()
+        self.tools = ToolRegistry()
+        self.cognitive = CognitiveEngine(self)
 
         # Memory 
         self.semantic = SemanticMemory()
@@ -52,6 +90,15 @@ class Brain:
         self.goal_agent = GoalAgent()
         self.task_agent = TaskAgent()
         self.reflection = ReflectionAgent()
+        self.attention = AttentionAgent()
+        self.knowledge = KnowledgeAgent()
+        self.tool_selector = ToolSelectorAgent()
+        self.curiosity = CuriosityAgent()
+        self.summary = SummaryAgent()
+        self.predictor=PredictionAgent()
+        self.personality=PersonalityAgent()
+        self.context=ContextAgent()
+        self.memory = MemoryAgent()
         
         # Support systems
         self.session = SessionAgent()
@@ -66,6 +113,26 @@ class Brain:
         self.emotion = EmotionAgent()
         self.blackboard = Blackboard()
         self.planner2 = Planner2Agent()
+        self.thought = ThoughtAgent()
+        self.reasoning2 = Reasoning2Agent()
+        self.scheduler=SchedulerAgent()
+        self.improver=SelfImprovementAgent()
+        self.action=ActionAgent()
+        self.simulator=SimulationAgent()
+        self.evolution=EvolutionAgent()
+        self.imagination=ImaginationAgent()
+        self.dream=DreamAgent()
+        self.subconscious=SubconsciousAgent()
+        self.anomaly=AnomalyAgent()
+        self.mission=MissionAgent()
+        self.social=SocialAgent()
+        self.survival=SurvivalAgent()
+        self.debate=DebateAgent()
+        self.reality=RealityAgent()
+        self.strategy=StrategyAgent()
+        
+        # Vision
+        #self.vision = VisionAgent()
 
         # Executive Controller
         self.executive = Executive(self)
@@ -79,6 +146,12 @@ class Brain:
         self.executive.register("emotion", self.emotion)
         self.executive.register("episode", self.episode)
         self.executive.register("task", self.task_agent)
+        self.tools.register("planner", self.planner)
+        self.tools.register("knowledge", self.knowledge)
+        self.tools.register("reasoning", self.reasoning)
+        self.tools.register("memory", self.memory)
+        #self.tools.register("vision", self.vision)
+       
 
         self.executive.register(
             "planner",
@@ -168,18 +241,34 @@ class Brain:
 
 
     def think(self, user_input):
+        
+        
+        emotion = self.emotion.detect(
+            user_input
+        )
 
-        # =====================
+        mood = emotion.get(
+            "mood",
+            "neutral"
+        )
+
+        perception = self.perception.perceive(
+            user_input,
+            context=self.workspace.show(),
+            emotion=mood
+
+        )
+        
+       
+
+
         # Reset workspace
-        # =====================
 
-        self.workspace.clear()
+        self.workspace.reset()
 
         lower = user_input.lower().strip()
 
-        # =====================
         # Analyze
-        # =====================
 
         analysis = self.nlu.analyze(
             user_input
@@ -195,9 +284,7 @@ class Brain:
             None
         )
 
-        # =====================
         # Emotion
-        # =====================
 
         emotion = self.emotion.detect(
             user_input
@@ -228,18 +315,13 @@ class Brain:
             mood
         )
 
-
-        # =====================
         # Save episode
-        # =====================
 
         self.episode.remember(
             user_input
         )
 
-        # =====================
         # Workspace
-        # =====================
 
         self.workspace.set(
             "intent",
@@ -251,9 +333,34 @@ class Brain:
             topic
         )
 
-        # =====================
+        # Attention Agent
+
+        focus = self.attention.focus(
+            user_input,
+            self.workspace,
+            self.state
+        )
+
+        self.workspace.set(
+            "focus",
+            focus
+        )
+
+
+
+         # Thoughts (CoT)
+
+        thoughts = self.thought.think(
+            user_input,
+            focus
+        )
+
+        self.workspace.set(
+            "internal_thoughts",
+            thoughts
+        )
+
         # Reasoning
-        # =====================
 
         reasoning = self.reasoning.reason(
             analysis
@@ -322,17 +429,278 @@ class Brain:
 
         if "time" in lower:
 
-            result = self.tools.run(
-                "time_tool",
-                None
-            )
+            tool = self.tools.get("time_tool")
+            if tool:
+                result = tool.execute(None)
 
         elif "idea" in lower:
 
-            result = self.tools.run(
-                "random_tool",
-                None
+            tool = self.tools.get("random_tool")
+            if tool:
+                result = tool.execute(None)
+            
+        
+         
+        self.workspace.reset()
+
+        self.workspace.set("user_input", user_input)
+
+        analysis = self.nlu.analyze(user_input)
+
+        self.workspace.set("intent", analysis["intent"])
+        self.workspace.set("topic", analysis["topic"])
+
+        self.cognitive.process(self.workspace)
+
+
+
+        
+        # Knowledge Graph
+
+        if topic:
+
+            self.knowledge.connect(
+            topic,
+            "related_to",
+            intent
+        )
+            
+
+        # R2 Reasoning 
+
+        knowledge=[]
+
+        if topic:
+
+            knowledge=(
+                self.knowledge.related(
+                    topic
+                )
             )
+
+        reasoning_stream=(
+            self.reasoning2.analyze(
+                user_input,
+                focus,
+                knowledge
+            )
+        )
+
+        self.workspace.set(
+            "reasoning_stream",
+            reasoning_stream
+        )
+
+        # Tool Selector
+
+        selected=(
+            self.tool_selector.choose(
+                user_input
+            )
+        )
+
+        self.workspace.set(
+            "selected_tool",
+            selected
+        )
+
+
+        # Curiosity 
+
+        question=(
+            self.curiosity.wonder(
+                topic
+            )
+        )
+
+        self.workspace.set(
+            "curiosity",
+            question
+        )
+        
+
+
+        # Simulation
+
+        if topic:
+
+            futures=(
+                self.simulator.run(
+                topic
+                )
+            )
+
+            self.workspace.set(
+                "futures",
+                futures
+            )
+
+            dream=(
+                self.imagination.dream(
+                    futures
+                )
+            )
+
+            self.workspace.set(
+                "dream",
+                dream
+            )
+
+        
+        
+
+
+        # Summary
+
+        all_thoughts=[]
+
+        # Thought agent thoughts
+        internal = self.workspace.get(
+            "internal_thoughts"
+        )
+
+        if internal:
+            all_thoughts.extend(
+                internal
+            )
+
+        # Reasoning stream thoughts
+        reasoning = self.workspace.get(
+            "reasoning_stream"
+        )
+
+        if reasoning:
+            all_thoughts.extend(
+                reasoning
+            )
+
+        summary = self.summary.summarize(
+            all_thoughts
+        )
+
+        self.workspace.set(
+            "summary",
+            summary
+        )
+
+        # Prediction & Context
+
+        prediction=self.predictor.predict(
+            intent,
+            topic
+        )
+
+        self.workspace.set(
+            "prediction",
+            prediction
+        )
+
+        context=self.context.build(
+            self.workspace
+        )
+
+        self.workspace.set(
+            "context",
+            context
+        )
+
+
+    # Action
+        next_action=self.action.act(
+
+            intent,
+            topic
+        )
+
+        self.workspace.set(
+            "next_action",
+            next_action
+        )
+
+        improvements=self.improver.suggest(
+            self.workspace
+        )
+
+        self.workspace.set(
+            "improvements",
+            improvements
+        )
+
+                # Debate & Reality
+
+        if topic:
+
+            debates=(
+        self.debate.argue(
+            topic
+        )
+    )
+
+            self.workspace.set(
+
+        "debates",
+
+        debates
+    )
+
+            futures=(
+                self.workspace.get(
+                    "futures"
+                )
+            )
+
+            selected=(
+                self.strategy.choose(
+                    futures
+                )
+            )
+
+        self.workspace.set(
+            "strategy",
+            selected
+        )
+
+        if selected:
+
+            reality= self.reality.verify(
+                        selected
+
+                )
+            
+            self.workspace.set(
+                "reality",
+                reality
+            )
+
+        dream=self.dream.generate(topic)
+        self.workspace.set(
+            "dream",
+            dream
+        )
+
+        mission=self.mission.create(topic)
+        self.workspace.set(
+            "mission",
+            mission
+        )
+
+        social=self.social.analyze(
+            user_input
+        )
+        self.workspace.set(
+            "social",
+            social
+        )
+
+        anomaly=self.anomaly.check(
+            self.workspace
+        )
+        self.workspace.set(
+            "anomaly",
+            anomaly
+        )
+
+
 
         # Main logic
 
@@ -500,13 +868,17 @@ class Brain:
 
         elif mood == "focused":
 
-            result =  result
-
+        
         # =====================
         # Final response
         # =====================
 
-        final_response = self.response.generate(
+            result=self.personality.response_style(
+            result,
+            mood
+        )
+
+        final_response=self.response.generate(
             result
         )
 
@@ -542,6 +914,11 @@ class Brain:
     def show_history(self):
 
         return self.session.summary()
+    
+    
+        return self.workspace.get("response") \
+            or self.workspace.get("decision") \
+            or self.workspace.show()
 
 
     # Executive Events

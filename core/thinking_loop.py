@@ -57,7 +57,6 @@ class ThinkingLoop:
 
     def background_tasks(self):
 
-        # Execute one queued executive task
         if hasattr(self.brain, "executive"):
 
             try:
@@ -68,7 +67,6 @@ class ThinkingLoop:
 
                 print(f"[Executive] {e}")
 
-        # Optional future scheduled jobs
         if hasattr(self.brain, "scheduler"):
 
             try:

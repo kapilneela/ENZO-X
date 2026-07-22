@@ -3,12 +3,6 @@ import time
 
 
 class CognitiveCycle:
-    """
-    ENZO Background Maintenance Cycle
-
-    Runs lightweight maintenance tasks only.
-    It does NOT perform autonomous thinking.
-    """
 
     def __init__(self, brain, interval=30):
 
@@ -17,8 +11,6 @@ class CognitiveCycle:
 
         self.running = False
         self.thread = None
-
-    # ----------------------------------
 
     def start(self):
 
@@ -34,16 +26,12 @@ class CognitiveCycle:
 
         self.thread.start()
 
-    # ----------------------------------
-
     def stop(self):
 
         self.running = False
 
         if self.thread:
             self.thread.join(timeout=1)
-
-    # ----------------------------------
 
     def loop(self):
 
@@ -59,13 +47,9 @@ class CognitiveCycle:
 
             time.sleep(self.interval)
 
-    # ----------------------------------
-
     def step(self):
 
-        # -----------------------------
         # Execute one queued task
-        # -----------------------------
 
         if hasattr(self.brain, "executive"):
 
@@ -74,9 +58,7 @@ class CognitiveCycle:
             except Exception:
                 pass
 
-        # -----------------------------
         # Periodic memory save
-        # -----------------------------
 
         if hasattr(self.brain, "episode"):
 
@@ -85,10 +67,8 @@ class CognitiveCycle:
                     self.brain.episode.save()
             except Exception:
                 pass
-
-        # -----------------------------
+            
         # Semantic memory save
-        # -----------------------------
 
         if hasattr(self.brain, "semantic"):
 
@@ -98,9 +78,7 @@ class CognitiveCycle:
             except Exception:
                 pass
 
-        # -----------------------------
         # Future scheduler hook
-        # -----------------------------
 
         if hasattr(self.brain, "scheduler"):
 
