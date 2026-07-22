@@ -1,0 +1,69 @@
+[
+    {
+        "id": 1,
+        "name": "Build Neuro AI",
+        "status": "active",
+        "progress": 7,
+        "priority": 5,
+        "created": "2026-07-05 22:46:37.309568",
+        "completed": null,
+        "tasks": [
+            {
+                "task": "Learn Python",
+                "done": true
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            },
+            {
+                "task": "Learn Python",
+                "done": false
+            },
+            {
+                "task": "Learn Machine Learning",
+                "done": false
+            }
+        ]
+    }
+]
