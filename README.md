@@ -1,4 +1,4 @@
-# ENZO-X 🚀
+# ENZO-X 
 
 ### Self-Evolving AI Assistant with Memory, Intent Understanding and Adaptive Learning
 
@@ -13,14 +13,23 @@ The long-term vision of ENZO-X is to create an AI system capable of adapting its
 ### Current Features
 
 ✅ Persistent memory system
+
 ✅ User fact learning
+
 ✅ Knowledge retrieval system
+
 ✅ Intent detection
+
 ✅ Context understanding
+
 ✅ Decision engine
+
 ✅ Learning plan generation
+
 ✅ Project planning generation
+
 ✅ Habit tracking
+
 ✅ Modular architecture
 
 ---
@@ -89,7 +98,7 @@ ENZO-X/
 Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/ENZO-X.git
+git clone https://github.com/kapilneela/ENZO-X.git
 ```
 
 Move into project folder:
