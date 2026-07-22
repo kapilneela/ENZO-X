@@ -1,46 +1,70 @@
 class AutonomousAgent:
+    """
+    Decides what ENZO should focus on next.
+    """
 
-    def decide(
-        self,
-        goals,
-        tasks
-    ):
+    def decide(self, goals, tasks):
 
-        actions=[]
+        actions = []
 
+        # -----------------------------
+        # Active Goal
+        # -----------------------------
 
         if goals:
 
-            actions.append(
-                f"Continue goal: {goals[-1]}"
+            for goal in reversed(goals):
+
+                if goal.get("status", "active") != "completed":
+
+                    actions.append(
+                        f"Continue goal: {goal['name']}"
+                    )
+
+                    break
+
+        # -----------------------------
+        # Next Task
+        # -----------------------------
+
+        pending = [
+
+            task for task in tasks
+
+            if task.get("status") != "completed"
+
+        ]
+
+        if pending:
+
+            pending.sort(
+
+                key=lambda x: x.get("priority", 0),
+
+                reverse=True
+
             )
 
+            task = pending[0]
 
-        for task in tasks:
+            actions.append(
 
-            if not task["done"]:
+                f"Finish task: {task['title']}"
 
-                actions.append(
-                    f"Finish task: {task['task']}"
-                )
+            )
 
-                break
-
+        # -----------------------------
+        # Response
+        # -----------------------------
 
         if not actions:
 
             return "Nothing pending."
 
+        output = "Today's focus:\n\n"
 
-        output="Today's focus:\n\n"
+        for i, action in enumerate(actions, 1):
 
-        for i,a in enumerate(
-            actions,
-            1
-        ):
-
-            output+=(
-                f"{i}. {a}\n"
-            )
+            output += f"{i}. {action}\n"
 
         return output

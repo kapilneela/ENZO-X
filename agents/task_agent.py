@@ -170,7 +170,15 @@ class TaskAgent:
 
     def next_task(self):
 
-        pending=self.pending()
+        pending = [
+
+            t for t in self.tasks
+            if t["status"] in [
+                "todo",
+                "in_progress"
+                ]
+
+        ]
 
         if not pending:
 
@@ -218,7 +226,13 @@ class TaskAgent:
 
         self.save()
 
+    def show(self, status=None):
 
-    def show(self):
+        if status is None:
+            return self.tasks
 
-        return self.tasks
+        return [
+            task
+            for task in self.tasks
+            if task["status"] == status
+        ]

@@ -85,4 +85,15 @@ class EvolutionAgent:
                 return f"Created new command: {new_command}"
 
         return None
+    
+
+    def mutate(
+        self,
+        future
+    ):
+        idea=future["idea"]
+        return (
+            idea +
+            " + autonomous learning"
+        )
 

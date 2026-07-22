@@ -1,41 +1,39 @@
-import importlib
-import os
-
-
 class ToolAgent:
 
     def __init__(self):
+        self.tools = {}
 
-        self.tools={}
+    def register(self, name, tool):
+        self.tools[name] = tool
 
-        self.load()
+    def get(self, name):
+        return self.tools.get(name)
 
+    def exists(self, name):
+        return name in self.tools
 
-    def load(self):
+    def list(self):
+        return list(self.tools.keys())
 
-        folder="tools"
+    def run(self, name, *args, **kwargs):
 
-        for file in os.listdir(folder):
+        tool = self.get(name)
 
-            if file.endswith(".py"):
+        if tool is None:
+            raise ValueError(f"Tool '{name}' not found.")
 
-                name=file[:-3]
+        # Function tool
+        if callable(tool):
+            return tool(*args, **kwargs)
 
-                module=importlib.import_module(
-                    f"tools.{name}"
-                )
+        # Class with execute()
+        if hasattr(tool, "execute"):
+            return tool.execute(*args, **kwargs)
 
-                self.tools[name]=(
-                    module.Tool()
-                )
+        # Class with run()
+        if hasattr(tool, "run"):
+            return tool.run(*args, **kwargs)
 
-
-    def run(self,name,data):
-
-        if name in self.tools:
-
-            return self.tools[name].run(
-                data
-            )
-
-        return None
+        raise TypeError(
+            f"Tool '{name}' cannot be executed."
+        )

@@ -1,84 +1,64 @@
 from core.memory import Memory
 
-memory = Memory()
+class MemoryAgent:
 
+    def __init__(self):
+        self.memory = Memory()
 
-def process(user_input):
+    def process(self, user_input):
 
-    text = user_input.lower().strip()
+        text = user_input.lower().strip()
 
+        if "my name is" in text:
 
-    # Existing name memory
-    if "my name is" in text:
+            name = text.split("my name is")[1].strip()
 
-        name = text.split("my name is")[1].strip()
+            self.memory.remember("username", name)
 
-        memory.remember("username",name)
+            return f"I'll remember your name as {name}"
 
-        return f"I'll remember your name as {name}"
+        if "who am i" in text:
 
+            name = self.memory.recall("username")
 
-    if "who am i" in text:
+            if name:
+                return f"You are {name}"
 
-        name = memory.recall("username")
+            return "I don't know yet."
 
-        if name:
-            return f"You are {name}"
+        if text.startswith("remember"):
 
-        return "I don't know yet."
+            try:
+                statement = text.replace("remember", "").strip()
 
+                key, value = statement.split(" is ", 1)
 
-    # Generic learning:
-    # remember X is Y
+                self.memory.remember(
+                    key.strip(),
+                    value.strip()
+                )
 
-    if text.startswith("remember"):
+                return f"I'll remember that {key} is {value}"
 
-        try:
+            except:
+                return "Use: remember X is Y"
 
-            statement = text.replace("remember","").strip()
+        if text.startswith("what is my"):
 
-            key,value = statement.split(" is ",1)
+            key = text.replace("what is my", "").strip()
 
-            key=key.strip()
+            value = self.memory.recall(key)
 
-            value=value.strip()
+            if value:
+                return f"Your {key} is {value}"
 
-            memory.remember(key,value)
+        if text.startswith("what is"):
 
-            return f"I'll remember that {key} is {value}"
+            key = text.replace("what is", "").strip()
 
-        except:
+            value = self.memory.recall(key)
 
-            return "Use: remember X is Y"
+            if value:
+                return f"{key} is {value}"
 
-
-    # Generic recall:
-    # what is X
-
-    if text.startswith("what is"):
-
-        key = text.replace("what is","").strip()
-
-        value = memory.recall(key)
-
-        if value:
-
-            return f"{key} is {value}"
-
-
-
-    # Generic recall:
-    # what is my X
-
-    if text.startswith("what is my"):
-
-        key = text.replace("what is my","").strip()
-
-        value=memory.recall(key)
-
-        if value:
-
-            return f"Your {key} is {value}"
-
-
-    return None
+        return None
