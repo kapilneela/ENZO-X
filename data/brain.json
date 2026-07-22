@@ -1,0 +1,30 @@
+{
+    "name": "ENZO",
+    "version": "1.0",
+
+    "modules": {
+        "knowledge": "knowledge.json",
+        "coding": "coding.json",
+        "science": "science.json",
+        "math": "math.json",
+        "history": "history.json",
+        "world": "world.json",
+        "memory": "memory.json",
+        "skills": "skills.json",
+        "personality": "personality.json",
+        "user": "user.json"
+    },
+
+    "default_module": "knowledge",
+
+    "priority": [
+        "memory",
+        "user",
+        "knowledge",
+        "coding",
+        "science",
+        "math",
+        "history",
+        "world"
+    ]
+}

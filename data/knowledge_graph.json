@@ -1,0 +1,70 @@
+{
+    "neuro ai": [
+        {
+            "relation": "related_to",
+            "target": "build"
+        }
+    ],
+    "transformer": [
+        {
+            "relation": "related_to",
+            "target": "learn"
+        }
+    ],
+    "teleport machine": [
+        {
+            "relation": "related_to",
+            "target": "build"
+        }
+    ],
+    "math ai": [
+        {
+            "relation": "related_to",
+            "target": "build"
+        }
+    ],
+    "python": [
+        {
+            "relation": "related_to",
+            "target": "learn"
+        },
+        {
+            "relation": "related_to",
+            "target": "ask"
+        }
+    ],
+    "transformers": [
+        {
+            "relation": "related_to",
+            "target": "learn"
+        },
+        {
+            "relation": "related_to",
+            "target": "ask"
+        }
+    ],
+    "machine learning": [
+        {
+            "relation": "related_to",
+            "target": "ask"
+        }
+    ],
+    "ai": [
+        {
+            "relation": "related_to",
+            "target": "ask"
+        }
+    ],
+    "learn pytorch": [
+        {
+            "relation": "related_to",
+            "target": "task"
+        }
+    ],
+    "build tokenizer": [
+        {
+            "relation": "related_to",
+            "target": "task"
+        }
+    ]
+}

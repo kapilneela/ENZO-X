@@ -1,8 +1,9 @@
 {
     "machine ing": 4,
     "ai": 5,
-    "python": 2,
+    "python": 15,
     "": 2,
     "deep ing": 2,
-    "transformer": 2
+    "transformer": 3,
+    "transformers": 12
 }
